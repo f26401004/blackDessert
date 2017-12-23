@@ -51,11 +51,22 @@ loaderState.preload = function(){
   game.load.image('head9','../assets/scene_class/class_command_9.png')
   game.load.image('head10','../assets/scene_class/class_command_10.png')
 
+  // load frame
+  game.load.image('chooseFrame_0', '../assets/scene_class/class_window_0.png');
+  game.load.image('chooseFrame_1', '../assets/scene_class/class_window_1.png');
+  game.load.image('chooseFrame_2', '../assets/scene_class/class_window_2.png');
+  game.load.image('chooseFrame_3', '../assets/scene_class/class_window_3.png');
+  game.load.image('chooseFrame_4', '../assets/scene_class/class_window_4.png');
+  game.load.image('chooseFrame_5', '../assets/scene_class/class_window_5.png');
+  game.load.image('chooseFrame_6', '../assets/scene_class/class_window_6.png');
+  game.load.image('chooseFrame_7', '../assets/scene_class/class_window_7.png');
+  game.load.image('chooseFrame_8', '../assets/scene_class/class_window_8.png');
+  game.load.image('chooseFrame_9', '../assets/scene_class/class_window_9.png');
+
   // load other
   game.load.image('background', '../assets/scene_choose/map_back.png')
   game.load.image('pressStart', '../assets/scene_search/press_to_start.png')
   game.load.image('chooseButton','../assets/scene_class/enter_command.png')
-  game.load.image('chooseFrame','../assets/scene_class/class_window.png')
   game.load.image('chooseHeroName','../assets/scene_class/class_name_window.png')
   game.load.image('black','../assets/black.jpg')
   game.load.spritesheet('kaboom','../assets/explode.png', 128,128)

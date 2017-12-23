@@ -17,7 +17,7 @@ game.state.add('mapState', mapState)
 game.state.add('sceneState', sceneState)
 game.state.add('miniGameState', miniGameState)
 game.state.add('gameOverState', gameOverState)
-
+game.state.add('chooseState_test', chooseState_test);
 
 // global variable define
 var heroNum = 10
@@ -52,4 +52,4 @@ var playerInfo = {
 }
 
 // game start
-game.state.start('bootState')
+game.state.start('chooseState_test');
