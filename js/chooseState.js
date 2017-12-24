@@ -4,39 +4,30 @@ chooseState.count = 0;
 chooseState.index = 0;
 chooseState.page = 0;
 chooseState.max_page = 4;
+chooseState.heroName;
 chooseState.frame;
+chooseState.figure;
+chooseState.button;
+chooseState.leftGroup;
 chooseState.head = [];
 chooseState.black;
 chooseState.activeHeadTween;
 chooseState.activeHeadTimer;
-chooseState.transFrameTween = [];
-chooseState.transFrameTimer;
+chooseState.transLeftTween = [];
+chooseState.transLeftTimer;
 
 chooseState.preload = function(){
-  // load head
-  game.load.image('head1','../assets/scene_class/class_command_1.png')
-  game.load.image('head2','../assets/scene_class/class_command_2.png')
-  game.load.image('head3','../assets/scene_class/class_command_3.png')
-  game.load.image('head4','../assets/scene_class/class_command_4.png')
-  game.load.image('head5','../assets/scene_class/class_command_5.png')
-  game.load.image('head6','../assets/scene_class/class_command_6.png')
-  game.load.image('head7','../assets/scene_class/class_command_7.png')
-  game.load.image('head8','../assets/scene_class/class_command_8.png')
-  game.load.image('head9','../assets/scene_class/class_command_9.png')
-  game.load.image('head10','../assets/scene_class/class_command_10.png')
-
-  // load frame
-  game.load.image('chooseFrame_1', '../assets/scene_class/class_window_1.png');
-  game.load.image('chooseFrame_2', '../assets/scene_class/class_window_2.png');
-  game.load.image('chooseFrame_3', '../assets/scene_class/class_window_3.png');
-  game.load.image('chooseFrame_4', '../assets/scene_class/class_window_4.png');
-  game.load.image('chooseFrame_5', '../assets/scene_class/class_window_5.png');
-  game.load.image('chooseFrame_6', '../assets/scene_class/class_window_6.png');
-  game.load.image('chooseFrame_7', '../assets/scene_class/class_window_7.png');
-  game.load.image('chooseFrame_8', '../assets/scene_class/class_window_8.png');
-  game.load.image('chooseFrame_9', '../assets/scene_class/class_window_9.png');
-  game.load.image('chooseFrame_10', '../assets/scene_class/class_window_10.png');
-
+  for (i = 1 ; i < 11 ; ++i)
+  {
+    // load head
+    game.load.image('head'+i,'../assets/scene_class/class_command_'+i+'.png')
+    // load frame
+    game.load.image('chooseFrame_'+i, '../assets/scene_class/class_window_'+i+'.png');
+    // load name
+    game.load.image('name'+i,'../assets/scene_class/name_'+i+'.png');
+    // load figure
+    game.load.image('figure'+i, '../assets/scene_class/figure_'+i+'.png');
+  }
   // load other
   game.load.image('background', '../assets/scene_choose/map_back.png')
   game.load.image('chooseButton','../assets/scene_class/enter_command.png')
@@ -66,7 +57,7 @@ chooseState.create = function() {
   chooseState.black.blendMode = PIXI.blendModes.MULTIPLY;
   chooseState.black.alpha = 0.75;
   // add the hero name
-  chooseState.heroName = chooseState.add.sprite(0, 0, 'chooseHeroName');
+  chooseState.heroName = chooseState.add.sprite(0, 0, 'name1');
   chooseState.heroName.scale.setTo(scaleX, scaleY);
   chooseState.heroName.position.x = width * 0.22;
   chooseState.heroName.position.y = height * 0.06;
@@ -75,6 +66,13 @@ chooseState.create = function() {
   chooseState.frame.scale.setTo(scaleX, scaleY);
   chooseState.frame.position.x = width * 0.03;
   chooseState.frame.position.y = height * 0.18; 
+  // add the class figure
+  chooseState.figure = chooseState.add.sprite(0, 0, 'figure1');
+  chooseState.figure.scale.setTo(scaleX, scaleY);
+  chooseState.figure.anchor.x = 0.5;
+  chooseState.figure.anchor.y = 0.55;
+  chooseState.figure.position.x = width * 0.2;
+  chooseState.figure.position.y = height * 0.65;
    // add the button of choose the class.
   chooseState.button = chooseState.add.sprite(0, 0, 'chooseButton');
   chooseState.button.scale.setTo(scaleX, scaleY);
@@ -96,6 +94,12 @@ chooseState.create = function() {
   // set the active head tween
   chooseState.activeTween = game.add.tween(chooseState.head[chooseState.index].scale).to({x:scaleX*0.95, y:scaleY*0.95}, 500, Phaser.Easing.Linear.None, true, 0, 1, true);
   chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
+  // group the left information to a group.
+  chooseState.leftGroup = game.add.group();
+  chooseState.leftGroup.add(chooseState.frame);
+  chooseState.leftGroup.add(chooseState.heroName);
+  chooseState.leftGroup.add(chooseState.button);
+  chooseState.leftGroup.add(chooseState.figure);
 }
 
 chooseState.createHeroHead = function() {
@@ -120,12 +124,12 @@ chooseState.createHeroHead = function() {
 chooseState.heroInfoRefresh = function() {
   //chooseState.titleName.text = 'HERO ' + this.n
   // remove all effect on frame.
-  game.time.events.remove(chooseState.transFrameTimer);
-  game.tweens.remove(chooseState.transFrameTween);
-  chooseState.frame.position.x = width * 0.03;
-  chooseState.transFrameTween[0] = game.add.tween(chooseState.frame.position).to({x:chooseState.frame.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-  chooseState.transFrameTween[1] = game.add.tween(chooseState.frame).to({alpha: 0}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-  chooseState.transFrameTimer = game.time.events.add(Phaser.Timer.SECOND*0.5, chooseState.frameChange, this), {n:this.n};
+  game.time.events.remove(chooseState.transLeftTimer);
+  game.tweens.remove(chooseState.transLeftTween);
+  chooseState.leftGroup.position.x = 0;
+  chooseState.transLeftTween[0] = game.add.tween(chooseState.leftGroup.position).to({x:chooseState.leftGroup.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transLeftTween[1] = game.add.tween(chooseState.leftGroup).to({alpha: 0}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transLeftTimer = game.time.events.add(Phaser.Timer.SECOND*0.5, chooseState.leftChange, this);
    // remove all tween effect on head.
   game.tweens.remove(chooseState.activeTween);
   game.time.events.remove(chooseState.activeTimer);
@@ -147,11 +151,31 @@ chooseState.addTween = function() {
   chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
 }
 
-chooseState.frameChange = function () {
+chooseState.leftChange = function () {
   chooseState.frame.loadTexture('chooseFrame_' + (this.n + 1)); 
-  chooseState.frame.position.x += 200;
-  chooseState.transFrameTween[0] = game.add.tween(chooseState.frame.position).to({x:chooseState.frame.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
-  chooseState.transFrameTween[1] = game.add.tween(chooseState.frame).to({alpha: 1}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.figure.loadTexture('figure'+ (this.n + 1));
+  chooseState.heroName.loadTexture('name' + (this.n + 1));
+  // reset the anchor point
+  switch (this.n)
+  {
+    case 0:
+    case 6:
+    case 9:
+      chooseState.figure.anchor.x = 0.5;
+      chooseState.figure.anchor.y = 0.55;
+      break;
+ case 8:
+      chooseState.figure.anchor.x = 0.3;
+      chooseState.figure.anchor.y = 0.55;
+      break;
+    default:
+      chooseState.figure.anchor.x = 0.5;
+      chooseState.figure.anchor.y = 0.3;
+      break;
+  }
+  chooseState.leftGroup.position.x += 200;
+  chooseState.transLeftTween[0] = game.add.tween(chooseState.leftGroup.position).to({x:chooseState.leftGroup.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transLeftTween[1] = game.add.tween(chooseState.leftGroup).to({alpha: 1}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
 }
 chooseState.nextPage = function () {
   var base_y = height * 0.172;
