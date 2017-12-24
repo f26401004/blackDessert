@@ -18,7 +18,6 @@ game.state.add('sceneState', sceneState)
 game.state.add('miniGameState', miniGameState)
 game.state.add('gameOverState', gameOverState)
 
-
 // global variable define
 var heroNum = 10
 var scenesPic = ['castle', 'forest', 'town', 'lake', 'cave']
@@ -52,4 +51,4 @@ var playerInfo = {
 }
 
 // game start
-game.state.start('bootState')
+game.state.start('chooseState');
