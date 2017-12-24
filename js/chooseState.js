@@ -3,10 +3,12 @@ var chooseState = {};
 chooseState.count = 0;
 chooseState.index = 0;
 chooseState.page = 0;
-chooseState.count = 0;
 chooseState.max_page = 4;
 chooseState.frame;
 chooseState.head = [];
+chooseState.black;
+chooseState.activeTween;
+chooseState.activeTimer;
 
 chooseState.preload = function(){
   // load head
@@ -37,11 +39,11 @@ chooseState.preload = function(){
   game.load.image('background', '../assets/scene_choose/map_back.png')
   game.load.image('chooseButton','../assets/scene_class/enter_command.png')
   game.load.image('chooseHeroName','../assets/scene_class/class_name_window.png')
-  game.load.image('black','../assets/black.jpg')
+  game.load.image('shadow','../assets/scene_class/shadow.png')
 
   game.load.image('upArrow', '../assets/scene_class/arrow_up.png');
   game.load.image('downArrow', '../assets/scene_class/arrow_down.png');
-
+  
 }
 
 chooseState.create = function() {
@@ -55,6 +57,12 @@ chooseState.create = function() {
   // set the background picture.
   chooseState.bg = chooseState.add.sprite(0, 0, 'background');
   chooseState.bg.scale.setTo(scaleX, scaleY);
+  chooseState.black = chooseState.add.sprite(0, 0, 'shadow');
+  chooseState.black.scale.setTo(scaleX, scaleY);
+  chooseState.black.position.x = width * 0.59;
+  chooseState.black.position.y = 0;
+  chooseState.black.blendMode = PIXI.blendModes.MULTIPLY;
+  chooseState.black.alpha = 0.75;
   // add the hero name
   chooseState.heroName = chooseState.add.sprite(0, 0, 'chooseHeroName');
   chooseState.heroName.scale.setTo(scaleX, scaleY);
@@ -81,37 +89,59 @@ chooseState.create = function() {
   chooseState.downArrow.events.onInputDown.add(chooseState.nextPage, {n:chooseState.page});
   // add hero head command
   chooseState.createHeroHead();
+  game.world.bringToTop(chooseState.upArrow);
+  game.world.bringToTop(chooseState.downArrow);
+  // set the active head tween
+  chooseState.activeTween = game.add.tween(chooseState.head[chooseState.index].scale).to({x:scaleX*0.95, y:scaleY*0.95}, 500, Phaser.Easing.Linear.None, true, 0, 1, true);
+  chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
 }
 
 chooseState.createHeroHead = function() {
-  var base_x = width * 0.7;
-  var base_y = height * 0.03;
+  var base_x = width * 0.79;
+  var base_y = height * 0.19;
   // add the class head.
   for (i = 0 ; i < 10 ; ++i)
   {
     chooseState.head[i] = chooseState.add.sprite(base_x + width*0.11*((i+1)%2), base_y + i * height * 0.22, 'head'+(i+1));
     chooseState.head[i].scale.setTo(scaleX * 0.9, scaleY * 0.9);
-    chooseState.head[i].inputEnbled = true;
+    chooseState.head[i].anchor.x = 0.5;
+    chooseState.head[i].anchor.y = 0.5;
+    chooseState.head[i].inputEnabled = true;
     chooseState.head[i].events.onInputDown.add(chooseState.heroInfoRefresh, {n:i});
     if (i > 3)
       chooseState.head[i].alpha = 0;
     chooseState.count += 1;
-    console.log(chooseState.head[i]);
   }
 
 }
 
 chooseState.heroInfoRefresh = function() {
-  chooseState.titleName.txt = 'HERO ' + this.n
-  chooseState.frame.loadtexture('chooseFrame_' + this.n)
+  //chooseState.titleName.text = 'HERO ' + this.n
+  chooseState.frame.loadTexture('chooseFrame_' + this.n)
+  game.tweens.remove(chooseState.activeTween);
+  game.time.events.remove(chooseState.activeTimer);
   // remove all tween effect on head.
+  chooseState.index = this.n;
   for (i = 0 ; i < 10 ; ++i)
-    game.tween.removeFrom(chooseState.head[i]);
-  game.add.tween(chooseState.head[this.n]).to({tint : 0xffffff}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+    chooseState.head[i].scale.setTo(scaleX*0.9, scaleY*0.9);
+  chooseState.activeTween = game.add.tween(chooseState.head[chooseState.index].scale).to({x:scaleX*0.95, y:scaleY*0.95}, 500, Phaser.Easing.Linear.None, true, 0, 1, true);
+  chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
 }
 
+chooseState.addTween = function() {
+  // remove all other head state.
+  //game.tweens.removeAll();
+  //game.time.events.removeAll();
+  for (i = 0 ; i < 10 ; ++i)
+    chooseState.head[i].scale.setTo(scaleX*0.9, scaleY*0.9);
+  chooseState.activeTween = game.add.tween(chooseState.head[chooseState.index].scale).to({x:scaleX*0.95, y:scaleY*0.95}, 500, Phaser.Easing.Linear.None, true, 0, 1, true);
+  //game.add.tween(chooseState.head[chooseState.index].scale).to({x:scaleX*0.95, y:scaleY*0.95}, 500, Phaser.Easing.Linear.None, true, 0, 1, true);
+  chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
+}
+
+
 chooseState.nextPage = function () {
-  var base_y = height * 0.03;
+  var base_y = height * 0.19;
   var dy = height * 0.44;
   chooseState.page = (chooseState.page + 1) % chooseState.max_page;
   for (i = 0 ; i < 10 ; ++i)
@@ -125,7 +155,7 @@ chooseState.nextPage = function () {
   }
 }
 chooseState.prevPage = function () {
-  var base_y = height * 0.69;
+  var base_y = height * 0.84;
   var dy = height * 0.44;
   chooseState.page = (chooseState.page + chooseState.max_page - 1) % chooseState.max_page;
   for (i = 0 ; i < 10 ; ++i)
@@ -141,6 +171,5 @@ chooseState.prevPage = function () {
 
 
 chooseState.update = function() {
-  
 }
 
