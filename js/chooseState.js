@@ -7,8 +7,10 @@ chooseState.max_page = 4;
 chooseState.frame;
 chooseState.head = [];
 chooseState.black;
-chooseState.activeTween;
-chooseState.activeTimer;
+chooseState.activeHeadTween;
+chooseState.activeHeadTimer;
+chooseState.transFrameTween = [];
+chooseState.transFrameTimer;
 
 chooseState.preload = function(){
   // load head
@@ -24,7 +26,6 @@ chooseState.preload = function(){
   game.load.image('head10','../assets/scene_class/class_command_10.png')
 
   // load frame
-  game.load.image('chooseFrame_0', '../assets/scene_class/class_window_0.png');
   game.load.image('chooseFrame_1', '../assets/scene_class/class_window_1.png');
   game.load.image('chooseFrame_2', '../assets/scene_class/class_window_2.png');
   game.load.image('chooseFrame_3', '../assets/scene_class/class_window_3.png');
@@ -34,6 +35,7 @@ chooseState.preload = function(){
   game.load.image('chooseFrame_7', '../assets/scene_class/class_window_7.png');
   game.load.image('chooseFrame_8', '../assets/scene_class/class_window_8.png');
   game.load.image('chooseFrame_9', '../assets/scene_class/class_window_9.png');
+  game.load.image('chooseFrame_10', '../assets/scene_class/class_window_10.png');
 
   // load other
   game.load.image('background', '../assets/scene_choose/map_back.png')
@@ -69,14 +71,14 @@ chooseState.create = function() {
   chooseState.heroName.position.x = width * 0.22;
   chooseState.heroName.position.y = height * 0.06;
   // add the class information frame in the state. 
-  chooseState.frame = chooseState.add.sprite(0, 0, 'chooseFrame_0');
+  chooseState.frame = chooseState.add.sprite(0, 0, 'chooseFrame_1');
   chooseState.frame.scale.setTo(scaleX, scaleY);
   chooseState.frame.position.x = width * 0.03;
   chooseState.frame.position.y = height * 0.18; 
    // add the button of choose the class.
   chooseState.button = chooseState.add.sprite(0, 0, 'chooseButton');
   chooseState.button.scale.setTo(scaleX, scaleY);
-  chooseState.button.position.x = chooseState.frame.position.x + chooseState.frame.width - chooseState.button.width * 1.5;
+  chooseState.button.position.x = chooseState.frame.position.x + chooseState.frame.width - chooseState.button.width * 1.6;
   chooseState.button.position.y = chooseState.frame.position.y + chooseState.frame.height - chooseState.button.height * 2.5;
   // add the up & down arrow button
   chooseState.upArrow = chooseState.add.sprite(width * 0.73, height * 0.03, 'upArrow');
@@ -98,7 +100,7 @@ chooseState.create = function() {
 
 chooseState.createHeroHead = function() {
   var base_x = width * 0.79;
-  var base_y = height * 0.19;
+  var base_y = height * 0.172;
   // add the class head.
   for (i = 0 ; i < 10 ; ++i)
   {
@@ -117,10 +119,16 @@ chooseState.createHeroHead = function() {
 
 chooseState.heroInfoRefresh = function() {
   //chooseState.titleName.text = 'HERO ' + this.n
-  chooseState.frame.loadTexture('chooseFrame_' + this.n)
+  // remove all effect on frame.
+  game.time.events.remove(chooseState.transFrameTimer);
+  game.tweens.remove(chooseState.transFrameTween);
+  chooseState.frame.position.x = width * 0.03;
+  chooseState.transFrameTween[0] = game.add.tween(chooseState.frame.position).to({x:chooseState.frame.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transFrameTween[1] = game.add.tween(chooseState.frame).to({alpha: 0}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transFrameTimer = game.time.events.add(Phaser.Timer.SECOND*0.5, chooseState.frameChange, this), {n:this.n};
+   // remove all tween effect on head.
   game.tweens.remove(chooseState.activeTween);
   game.time.events.remove(chooseState.activeTimer);
-  // remove all tween effect on head.
   chooseState.index = this.n;
   for (i = 0 ; i < 10 ; ++i)
     chooseState.head[i].scale.setTo(scaleX*0.9, scaleY*0.9);
@@ -139,9 +147,14 @@ chooseState.addTween = function() {
   chooseState.activeTimer = game.time.events.add(Phaser.Timer.SECOND * 1, chooseState.addTween, this);
 }
 
-
+chooseState.frameChange = function () {
+  chooseState.frame.loadTexture('chooseFrame_' + (this.n + 1)); 
+  chooseState.frame.position.x += 200;
+  chooseState.transFrameTween[0] = game.add.tween(chooseState.frame.position).to({x:chooseState.frame.position.x-100}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+  chooseState.transFrameTween[1] = game.add.tween(chooseState.frame).to({alpha: 1}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, true);
+}
 chooseState.nextPage = function () {
-  var base_y = height * 0.19;
+  var base_y = height * 0.172;
   var dy = height * 0.44;
   chooseState.page = (chooseState.page + 1) % chooseState.max_page;
   for (i = 0 ; i < 10 ; ++i)
@@ -149,13 +162,13 @@ chooseState.nextPage = function () {
     var finalY = (chooseState.page ? chooseState.head[i].position.y - dy : base_y + i * dy / 2);
     game.add.tween(chooseState.head[i]).to({y: finalY}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
     if (chooseState.page * 2 <= i && i <= chooseState.page * 2 + 3)
-      game.add.tween(chooseState.head[i]).to({alpha : 1}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
+      game.add.tween(chooseState.head[i]).to({alpha : 1}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, false);
     else
-      game.add.tween(chooseState.head[i]).to({alpha : 0}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
+      game.add.tween(chooseState.head[i]).to({alpha : 0}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, false);
   }
 }
 chooseState.prevPage = function () {
-  var base_y = height * 0.84;
+  var base_y = height * 0.83;
   var dy = height * 0.44;
   chooseState.page = (chooseState.page + chooseState.max_page - 1) % chooseState.max_page;
   for (i = 0 ; i < 10 ; ++i)
@@ -163,9 +176,9 @@ chooseState.prevPage = function () {
     var finalY = (chooseState.page == chooseState.max_page - 1 ? base_y - (9 - i) * dy / 2 : chooseState.head[i].position.y + dy);
     game.add.tween(chooseState.head[i]).to({y : finalY}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
     if (chooseState.page * 2 <= i && i <= chooseState.page * 2 + 3)
-      game.add.tween(chooseState.head[i]).to({alpha : 1}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
+      game.add.tween(chooseState.head[i]).to({alpha : 1}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, false);
     else
-      game.add.tween(chooseState.head[i]).to({alpha : 0}, 1000, Phaser.Easing.Exponential.Out, true, 0, 0, false);
+      game.add.tween(chooseState.head[i]).to({alpha : 0}, 500, Phaser.Easing.Exponential.Out, true, 0, 0, false);
   }
 }
 
